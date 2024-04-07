@@ -22,5 +22,7 @@ const formattedPrice = computed(() => {
 </template>
 
 <style scoped lang="scss">
-
+td {
+    padding: 0.1rem 0.5rem;
+}
 </style>

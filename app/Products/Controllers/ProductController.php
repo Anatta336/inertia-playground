@@ -4,6 +4,7 @@ namespace App\Products\Controllers;
 
 use App\Base\Controllers\Controller;
 use App\Products\Models\Product;
+use App\Products\Requests\ProductListRequest;
 use Inertia\Inertia;
 
 /**
@@ -11,12 +12,30 @@ use Inertia\Inertia;
  */
 class ProductController extends Controller
 {
-    public function index()
+    /**
+     * List products in a datatable with support for pagination, sorting, and searching.
+     */
+    public function index(ProductListRequest $request)
     {
-        $products = Product::all();
+        $productQuery = Product::query();
+
+        $productQuery->orderBy($request->sort(), 'asc');
+
+        if (!empty($request->search())) {
+            $productQuery->where('name', 'like', '%' . $request->search() . '%');
+        }
+
+        $totalCount = $productQuery->count();
+
+        $productQuery->offset(($request->page() - 1) * $request->perPage());
+        $productQuery->limit($request->perPage());
+
+        $products = $productQuery->get();
 
         return Inertia::render('Products/List', [
-            'products' => $products
+            'products'   => $products,
+            'totalCount' => $totalCount,
+            'page'       => (int) $request->page(),
         ]);
     }
 }
