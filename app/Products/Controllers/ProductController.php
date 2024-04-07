@@ -27,15 +27,20 @@ class ProductController extends Controller
 
         $totalCount = $productQuery->count();
 
-        $productQuery->offset(($request->page() - 1) * $request->perPage());
-        $productQuery->limit($request->perPage());
+        $perPage = $request->perPage();
+        $maxPage = ceil($totalCount / $perPage);
+        $page = max(1, min($maxPage, $request->page()));
+
+        $productQuery->offset(($page - 1) * $perPage);
+        $productQuery->limit($perPage);
 
         $products = $productQuery->get();
 
         return Inertia::render('Products/List', [
             'products'   => $products,
             'totalCount' => $totalCount,
-            'page'       => (int) $request->page(),
+            'page'       => (int) $page,
+            'perPage'    => (int) $perPage,
         ]);
     }
 }
